@@ -1,0 +1,63 @@
+package com.socialmedia.socialmediaapi.service;
+
+import com.socialmedia.socialmediaapi.model.Post;
+import com.socialmedia.socialmediaapi.repo.PostRepo;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class PostService {
+
+    private final PostRepo postRepo;
+
+    @Transactional
+    public Post createPost(Map<String, Object> postMap) {
+        var post = postRepo.save(new Post(
+            postMap.get("header").toString(),
+            postMap.get("content").toString(),
+            postMap.get("image").toString())
+        );
+        log.debug("Post with id: '{}' saved.", post.getId());
+        return post;
+    }
+
+    public Optional<Post> findPostById(int id) {
+        return postRepo.findById(id);
+    }
+
+    @Transactional
+    public Optional<Post> updatePostById(int id, Map<String, Object> postMap) {
+        var optionalPost = postRepo.findById(id);
+        if (optionalPost.isPresent()){
+            var post = optionalPost.get();
+            if(postMap.containsKey("header") && !Objects.equals(post.getHeader(), postMap.get("header").toString())){
+                post.setHeader(postMap.get("header").toString());
+            }
+            if(postMap.containsKey("content") && !Objects.equals(post.getContent(), postMap.get("content").toString())){
+                post.setContent(postMap.get("content").toString());
+            }
+            if(postMap.containsKey("image") && !Objects.equals(post.getImage(), postMap.get("image").toString())){
+                post.setImage(postMap.get("image").toString());
+            }
+            log.debug("Post with id: '{}' updated.", post.getId());
+            return Optional.of(postRepo.save(post));
+        }
+        return optionalPost;
+    }
+
+    @Transactional
+    public Optional<Post> deletePostById(int id) {
+        var optionalPost = postRepo.findById(id);
+        optionalPost.ifPresent(postRepo::delete);
+        return optionalPost;
+    }
+}
+
