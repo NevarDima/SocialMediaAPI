@@ -1,13 +1,14 @@
 package com.socialmedia.socialmediaapi.repo;
 
-import com.socialmedia.socialmediaapi.model.Post;
+import com.socialmedia.socialmediaapi.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface PostRepo extends JpaRepository<Post, String> {
+public interface UserRepo extends JpaRepository<User, Long> {
 
-    Optional<Post> findById(long id);
+    Optional<User> findByEmail(String email);
+
 }

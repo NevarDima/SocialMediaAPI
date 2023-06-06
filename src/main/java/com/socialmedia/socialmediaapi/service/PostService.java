@@ -29,12 +29,12 @@ public class PostService {
         return post;
     }
 
-    public Optional<Post> findPostById(int id) {
+    public Optional<Post> findPostById(long id) {
         return postRepo.findById(id);
     }
 
     @Transactional
-    public Optional<Post> updatePostById(int id, Map<String, Object> postMap) {
+    public Optional<Post> updatePostById(long id, Map<String, Object> postMap) {
         var optionalPost = postRepo.findById(id);
         if (optionalPost.isPresent()){
             var post = optionalPost.get();
@@ -54,7 +54,7 @@ public class PostService {
     }
 
     @Transactional
-    public Optional<Post> deletePostById(int id) {
+    public Optional<Post> deletePostById(long id) {
         var optionalPost = postRepo.findById(id);
         optionalPost.ifPresent(postRepo::delete);
         return optionalPost;

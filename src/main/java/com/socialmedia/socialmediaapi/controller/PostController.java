@@ -5,18 +5,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@Controller
-@RequestMapping(value = "/post")
+@RestController
+@RequestMapping(value = "/api/v1/post")
 @RequiredArgsConstructor
 @Slf4j
 public class PostController {
@@ -37,7 +37,7 @@ public class PostController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<?> getPostById(@PathVariable int id){
+    public ResponseEntity<?> getPostById(@PathVariable long id){
         try{
             var optionalPost = postService.findPostById(id);
             if(optionalPost.isPresent()) {
@@ -53,7 +53,7 @@ public class PostController {
     }
 
     @PostMapping(value = "/{id}")
-    public ResponseEntity<?> updatePostById (@PathVariable int id, @RequestBody Map<String, Object> postMap){
+    public ResponseEntity<?> updatePostById (@PathVariable long id, @RequestBody Map<String, Object> postMap){
         try{
             var optionalPost =  postService.updatePostById(id, postMap);
             if(optionalPost.isPresent()) {
@@ -69,7 +69,7 @@ public class PostController {
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deletePostById(@PathVariable int id){
+    public ResponseEntity<?> deletePostById(@PathVariable long id){
         try{
             var optionalPost = postService.deletePostById(id);
             if (optionalPost.isPresent()) {
