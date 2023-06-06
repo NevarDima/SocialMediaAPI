@@ -6,7 +6,7 @@ import com.socialmedia.socialmediaapi.model.User;
 import com.socialmedia.socialmediaapi.model.auth.AuthenticationRequest;
 import com.socialmedia.socialmediaapi.model.auth.AuthenticationResponse;
 import com.socialmedia.socialmediaapi.model.auth.RegisterRequest;
-import com.socialmedia.socialmediaapi.repo.UserRepo;
+import com.socialmedia.socialmediaapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserRepo userRepo;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
@@ -31,7 +31,7 @@ public class AuthenticationService {
             .password(passwordEncoder.encode(request.getPassword()))
             .role(Role.USER)
             .build();
-        userRepo.save(user);
+        userService.save(user);
         var token = jwtUtils.generateToken(user);
         return AuthenticationResponse
             .builder()
@@ -46,7 +46,7 @@ public class AuthenticationService {
                 request.getPassword()
             )
         );
-        var user = userRepo.findByEmail(request.getEmail()).orElseThrow();
+        var user = userService.findByEmail(request.getEmail()).orElseThrow();
         var token = jwtUtils.generateToken(user);
         return AuthenticationResponse
             .builder()

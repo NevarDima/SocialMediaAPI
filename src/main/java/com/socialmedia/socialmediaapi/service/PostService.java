@@ -1,12 +1,14 @@
 package com.socialmedia.socialmediaapi.service;
 
 import com.socialmedia.socialmediaapi.model.Post;
+import com.socialmedia.socialmediaapi.model.User;
 import com.socialmedia.socialmediaapi.repo.PostRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,11 +21,15 @@ public class PostService {
     private final PostRepo postRepo;
 
     @Transactional
-    public Post createPost(Map<String, Object> postMap) {
-        var post = postRepo.save(new Post(
-            postMap.get("header").toString(),
-            postMap.get("content").toString(),
-            postMap.get("image").toString())
+    public Post createPost(User user, Map<String, Object> postMap) {
+        var post = postRepo.save(Post
+            .builder()
+            .header(postMap.get("header").toString())
+            .content(postMap.get("content").toString())
+            .image(postMap.get("image").toString())
+            .author(user)
+            .createdAt(LocalDateTime.now())
+            .build()
         );
         log.debug("Post with id: '{}' saved.", post.getId());
         return post;
@@ -47,6 +53,7 @@ public class PostService {
             if(postMap.containsKey("image") && !Objects.equals(post.getImage(), postMap.get("image").toString())){
                 post.setImage(postMap.get("image").toString());
             }
+            post.setUpdatedAt(LocalDateTime.now());
             log.debug("Post with id: '{}' updated.", post.getId());
             return Optional.of(postRepo.save(post));
         }

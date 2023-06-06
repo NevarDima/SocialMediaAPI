@@ -9,10 +9,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import java.time.LocalDateTime;
 
 @Entity
+@Builder
 @Table(name = "posts")
 @Data
 @NoArgsConstructor
@@ -28,11 +33,11 @@ public class Post {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User author;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-
-    public Post(String header, String content, String image) {
-        this.header = header;
-        this.content = content;
-        this.image = image;
+    @ToString.Include(name = "password")
+    private String maskPassword(){
+        return "********";
     }
 }

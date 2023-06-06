@@ -14,5 +14,7 @@ create table posts
     header  varchar(256),
     content varchar(1024),
     image   varchar(256),
-    user_id serial not null
+    user_id serial not null,
+    created_at timestamp,
+    updated_at timestamp
 );
