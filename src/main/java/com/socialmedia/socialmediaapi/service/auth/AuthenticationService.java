@@ -23,11 +23,12 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+        var lowerCaseEmail = request.getEmail().toLowerCase();
         var user = User
             .builder()
             .firstName(request.getFirstname())
             .lastName(request.getLastname())
-            .email(request.getEmail())
+            .email(lowerCaseEmail)
             .password(passwordEncoder.encode(request.getPassword()))
             .role(Role.USER)
             .build();
@@ -40,13 +41,14 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        var lowerCaseEmail = request.getEmail().toLowerCase();
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
+                lowerCaseEmail,
                 request.getPassword()
             )
         );
-        var user = userService.findByEmail(request.getEmail()).orElseThrow();
+        var user = userService.findByEmail(lowerCaseEmail).orElseThrow();
         var token = jwtUtils.generateToken(user);
         return AuthenticationResponse
             .builder()

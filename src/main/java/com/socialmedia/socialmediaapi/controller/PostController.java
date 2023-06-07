@@ -1,8 +1,8 @@
 package com.socialmedia.socialmediaapi.controller;
 
+import com.socialmedia.socialmediaapi.mapper.PostMapper;
 import com.socialmedia.socialmediaapi.model.User;
 import com.socialmedia.socialmediaapi.service.PostService;
-import com.socialmedia.socialmediaapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/v1/post")
@@ -25,14 +26,14 @@ import java.util.Map;
 public class PostController {
 
     private final PostService postService;
-    private final UserService userService;
+    private final PostMapper postMapper;
 
     @PostMapping(value = "/")
     public ResponseEntity<?> createPost(@AuthenticationPrincipal User user, @RequestBody Map<String, Object> postMap){
         try{
             var post =  postService.createPost(user, postMap);
-            log.debug("Post with id: '{}' successfully saved", post.getId());
-            return new ResponseEntity<>(post, HttpStatus.OK); // TODO return DTO
+            log.debug("Post with uuid: '{}' successfully saved", post.getUuid());
+            return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
         }catch (Exception e){
             log.error("Failed creating post", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -40,15 +41,15 @@ public class PostController {
 
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<?> getPostById(@PathVariable long id){
+    @GetMapping(value = "/{uuid}")
+    public ResponseEntity<?> getPostById(@PathVariable UUID uuid){
         try{
-            var optionalPost = postService.findPostById(id);
+            var optionalPost = postService.findPostById(uuid);
             if(optionalPost.isPresent()) {
-                log.debug("Post with id: '{}' successfully found", optionalPost.get().getId());
-                return new ResponseEntity<>(optionalPost.get(), HttpStatus.OK); // TODO return DTO
+                log.debug("Post with uuid: '{}' successfully found", optionalPost.get().getUuid());
+                return new ResponseEntity<>(postMapper.map(optionalPost.get()), HttpStatus.OK);
             }
-            log.debug("Post with id: '{}' doesn't exist", id);
+            log.debug("Post with uuid: '{}' doesn't exist", uuid);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch (Exception e){
             log.error("Failed getting post", e);
@@ -56,15 +57,15 @@ public class PostController {
         }
     }
 
-    @PostMapping(value = "/{id}") // TODO check User.id is equal to Post.user_id
-    public ResponseEntity<?> updatePostById (@AuthenticationPrincipal User user, @PathVariable long id, @RequestBody Map<String, Object> postMap){
+    @PostMapping(value = "/{uuid}")
+    public ResponseEntity<?> updatePostById (@AuthenticationPrincipal User user, @PathVariable UUID uuid, @RequestBody Map<String, Object> postMap){
         try{
-            var optionalPost =  postService.updatePostById(id, postMap);
+            var optionalPost =  postService.updatePostById(user.getUuid(), uuid, postMap);
             if(optionalPost.isPresent()) {
-                log.debug("Post with id: '{}' successfully updated", optionalPost.get().getId());
-                return new ResponseEntity<>(optionalPost, HttpStatus.OK); // TODO return DTO
+                log.debug("Post with uuid: '{}' successfully updated", optionalPost.get().getUuid());
+                return new ResponseEntity<>(postMapper.map(optionalPost.get()), HttpStatus.OK);
             }
-            log.debug("Post with id: '{}' doesn't exist", id);
+            log.debug("Post with uuid: '{}' doesn't exist", uuid);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch (Exception e){
             log.error("Failed updating post", e);
@@ -72,15 +73,15 @@ public class PostController {
         }
     }
 
-    @DeleteMapping(value = "/{id}") // TODO check User.id is equal to Post.user_id
-    public ResponseEntity<?> deletePostById(@AuthenticationPrincipal User user, @PathVariable long id){
+    @DeleteMapping(value = "/{uuid}")
+    public ResponseEntity<?> deletePostById(@AuthenticationPrincipal User user, @PathVariable UUID uuid){
         try{
-            var optionalPost = postService.deletePostById(id);
+            var optionalPost = postService.deletePostById(user.getUuid(), uuid);
             if (optionalPost.isPresent()) {
-                log.debug("Post with id: '{}' successfully deleted", id);
+                log.debug("Post with uuid: '{}' successfully deleted", uuid);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
-            log.debug("Post with id: '{}' doesn't exist", id);
+            log.debug("Post with uuid: '{}' doesn't exist", uuid);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch (Exception e){
             log.error("Failed deleting post", e);
