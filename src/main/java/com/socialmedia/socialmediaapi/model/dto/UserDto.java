@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.socialmedia.socialmediaapi.model.Role;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class UserDto {
-    private long id;
+    private UUID uuid;
     private String firstName;
     private String lastName;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
