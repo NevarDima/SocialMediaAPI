@@ -26,24 +26,11 @@ public class RelationsService {
         Optional<Relations> byInterest= relationsRepo.findBySubscriberAndInterestUuids(interestUuid, subscriberUuid);
         Relations relation;
         if(bySubscriber.isPresent()){
-            relation = bySubscriber.get();
-            log.debug("Relations between subscriber: '{}' and interest: '{}' exists.", subscriberUuid, interestUuid);
-            if(!relation.getRelationsStatus().equals(RelationsStatus.FRIEND)){
-                relation.setRelationsStatus(RelationsStatus.REQUESTFORFRIEND);
-                relationsRepo.save(relation);
-                log.debug("Relations between subscriber: '{}' and interest: '{}' was changed to '{}'.", subscriberUuid, interestUuid,
-                    RelationsStatus.REQUESTFORFRIEND);
-            }
+            relation = checkSubToInterestStatus(subscriberUuid, interestUuid, bySubscriber.get());
             return relation;
         }else if(byInterest.isPresent()){
-            relation = byInterest.get();
-            if(relation.getRelationsStatus().equals(RelationsStatus.REQUESTFORFRIEND)){
-                relation.setRelationsStatus(RelationsStatus.FRIEND);
-                relationsRepo.save(relation);
-                log.debug("Relations between subscriber: '{}' and interest: '{}' was changed to '{}'.", subscriberUuid, interestUuid,
-                    RelationsStatus.FRIEND);
-                return relation;
-            }
+            var optionalRelation = checkInterestToSubStatus(subscriberUuid, interestUuid, byInterest.get());
+            if (optionalRelation.isPresent()) return optionalRelation.get();
         }
         relation = relationsRepo.save(Relations
             .builder()
@@ -54,6 +41,28 @@ public class RelationsService {
         log.debug("Request for friendship between subscriber: '{}' and interest: '{}' saved with uuid: '{}'.", subscriberUuid, interestUuid,
             relation.getUuid());
         return relation;
+    }
+
+    private Optional<Relations> checkInterestToSubStatus(UUID subscriberUuid, UUID interestUuid, Relations byInterest) {
+        if(byInterest.getRelationsStatus().equals(RelationsStatus.REQUESTFORFRIEND)){
+            byInterest.setRelationsStatus(RelationsStatus.FRIEND);
+            relationsRepo.save(byInterest);
+            log.debug("Relations between subscriber: '{}' and interest: '{}' was changed to '{}'.", subscriberUuid, interestUuid,
+                RelationsStatus.FRIEND);
+            return Optional.of(byInterest);
+        }
+        return Optional.empty();
+    }
+
+    private Relations checkSubToInterestStatus(UUID subscriberUuid, UUID interestUuid, Relations bySubscriber) {
+        log.debug("Relations between subscriber: '{}' and interest: '{}' exists.", subscriberUuid, interestUuid);
+        if(!bySubscriber.getRelationsStatus().equals(RelationsStatus.FRIEND)){
+            bySubscriber.setRelationsStatus(RelationsStatus.REQUESTFORFRIEND);
+            relationsRepo.save(bySubscriber);
+            log.debug("Relations between subscriber: '{}' and interest: '{}' was changed to '{}'.", subscriberUuid, interestUuid,
+                RelationsStatus.REQUESTFORFRIEND);
+        }
+        return bySubscriber;
     }
 
     @Transactional
