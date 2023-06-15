@@ -26,6 +26,6 @@ public class Relations {
     private UUID uuid;
     private UUID subscriberUuid;
     private UUID interestUuid;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private RelationsStatus relationsStatus;
 }

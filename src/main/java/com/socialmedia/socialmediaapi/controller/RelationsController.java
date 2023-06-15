@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/v1/relations")
+@RequestMapping(value = "/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
 public class RelationsController {
@@ -31,86 +31,56 @@ public class RelationsController {
     @PostMapping(value = "/friends/{interestUuid}")
     public ResponseEntity<?> requestForFriendship(
         @AuthenticationPrincipal User user,
-        @PathVariable UUID interestUuid) {
-        try {
-            var relations = relationsService.requestForFrendship(user.getUuid(), interestUuid);
-            log.debug("Relation with uuid: '{}' successfully saved.", relations.getInterestUuid());
-            return new ResponseEntity<>(relationsMapper.map(relations), HttpStatus.OK);
-        } catch (Exception e) {
-            log.error("Failed saving request for friendship.", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        @PathVariable UUID interestUuid
+    ) {
+        var relations = relationsService.requestForFrendship(user.getUuid(), interestUuid);
+        log.debug("Relation with uuid: '{}' successfully saved.", relations.getInterestUuid());
+        return new ResponseEntity<>(relationsMapper.map(relations), HttpStatus.OK);
     }
 
     @PatchMapping(value = "/friends/{subscriberUuid}")
     public ResponseEntity<?> handleRequestForFriendship(
         @AuthenticationPrincipal User user,
         @PathVariable UUID subscriberUuid,
-        @RequestParam boolean isConfirmed) {
-        try {
-            var optionalRelations = relationsService.confirmFriendship(user.getUuid(), subscriberUuid, isConfirmed);
-            if (optionalRelations.isPresent()) {
-                log.debug("Relation with uuid: '{}' successfully updated.", optionalRelations.get().getInterestUuid());
-                return new ResponseEntity<>(relationsMapper.map(optionalRelations.get()), HttpStatus.OK);
-            }
-            log.debug("Relations for subscriber: '{}' and interest: '{}' doesn't exist.", subscriberUuid, user.getUuid());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            log.error("Failed updating request for friendship.", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        @RequestParam boolean isConfirmed
+    ) {
+        var relations = relationsService.confirmFriendship(user.getUuid(), subscriberUuid, isConfirmed);
+        log.debug("Relation with uuid: '{}' successfully updated.", relations.getInterestUuid());
+        return new ResponseEntity<>(relationsMapper.map(relations), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/friends/{uuid}")
     public ResponseEntity<?> removeFromFriends(
         @AuthenticationPrincipal User user,
-        @PathVariable UUID uuid) {
-        try {
-            var optionalRelation = relationsService.removeFromFriend(user.getUuid(), uuid);
-            if (optionalRelation.isPresent()) {
-                log.debug("Friendship was reduced between '{}' and '{}'.", user.getUuid(), uuid);
-                return new ResponseEntity<>(relationsMapper.map(optionalRelation.get()), HttpStatus.OK);
-            }
-            log.debug("Relations doesn't exist between '{}' and '{}'.", user.getUuid(), uuid);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            log.error("Failed removing for friends.", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        @PathVariable UUID uuid
+    ) {
+        var relations = relationsService.removeFromFriend(user.getUuid(), uuid);
+        log.debug("Friendship was reduced between '{}' and '{}'.", user.getUuid(), uuid);
+        return new ResponseEntity<>(relationsMapper.map(relations), HttpStatus.OK);
     }
 
     @GetMapping(value = "/friends")
     public ResponseEntity<?> getFriends(@AuthenticationPrincipal User user) {
-        try {
-            var optionalFriends = relationsService.getFriends(user.getUuid());
-            if (optionalFriends.isPresent()) {
-                log.debug("List of friends for user uuid '{}'.", user.getUuid());
-                return new ResponseEntity<>(optionalFriends.get(), HttpStatus.OK);
-            }
-            log.debug("Friends don't exist for user: '{}'.", user.getUuid());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            log.error("Failed getting friends.");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        var friends = relationsService.getFriends(user.getUuid());
+        log.debug("List of friends for user uuid '{}'.", user.getUuid());
+        return new ResponseEntity<>(friends, HttpStatus.OK);
     }
 
     @PostMapping(value = "/follow/{interestUuid}")
-    public ResponseEntity<?> follow(@AuthenticationPrincipal User user,
-                                    @PathVariable UUID interestUuid){
-        try {
-            var relations = relationsService.follow(user.getUuid(), interestUuid);
-            log.debug("Relation with uuid: '{}' successfully saved.", relations.getInterestUuid());
-            return new ResponseEntity<>(relationsMapper.map(relations), HttpStatus.OK);
-        } catch (Exception e) {
-            log.error("Failed saving request for follow.", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> follow(
+        @AuthenticationPrincipal User user,
+        @PathVariable UUID interestUuid
+    ) {
+        var relations = relationsService.follow(user.getUuid(), interestUuid);
+        log.debug("Relation with uuid: '{}' successfully saved.", relations.getInterestUuid());
+        return new ResponseEntity<>(relationsMapper.map(relations), HttpStatus.OK);
     }
 
-//    @DeleteMapping(value = "/follow/{interestUuid}")
-//    public ResponseEntity<?> unfollow(@AuthenticationPrincipal User user,
-//                                      @PathVariable UUID interestUuid){
-//
-//    }
+    @DeleteMapping(value = "/follow/{interestUuid}")
+    public ResponseEntity<?> unfollow(@AuthenticationPrincipal User user,
+                                      @PathVariable UUID interestUuid){
+        var relations = relationsService.unfollow(user.getUuid(), interestUuid);
+        log.debug("Relation with uuid: '{}' changed status to declined.", relations.getInterestUuid());
+        return new ResponseEntity<>(relationsMapper.map(relations), HttpStatus.OK);
+    }
 }

@@ -11,8 +11,8 @@ import java.util.UUID;
 
 public interface RelationsRepo extends JpaRepository<Relations, UUID> {
 
-    @Query("select r from Relations r where r.interestUuid = ?1 and r.subscriberUuid = ?2")
-    Optional<Relations> findBySubscriberAndInterestUuids(UUID interestUuid, UUID subscriberUuid);
+    @Query("select r from Relations r where r.subscriberUuid = ?1 and r.interestUuid = ?2")
+    Optional<Relations> findBySubscriberAndInterestUuids(UUID subscriberUuid, UUID interestUuid);
     @Query("select r.interestUuid from Relations r where r.subscriberUuid = ?1 and r.relationsStatus = ?2")
     Optional<List<UUID>> findInterestUuidsBySubscriberUuid(UUID userUuid, RelationsStatus status);
     @Query("select r.subscriberUuid from Relations r where r.interestUuid = ?1 and r.relationsStatus = ?2")

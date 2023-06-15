@@ -1,5 +1,7 @@
 package com.socialmedia.socialmediaapi.service;
 
+import com.socialmedia.socialmediaapi.exception.FriendsNotFoundException;
+import com.socialmedia.socialmediaapi.exception.RelationNotFoundException;
 import com.socialmedia.socialmediaapi.model.Relations;
 import com.socialmedia.socialmediaapi.model.RelationsStatus;
 import com.socialmedia.socialmediaapi.repo.RelationsRepo;
@@ -66,50 +68,52 @@ public class RelationsService {
     }
 
     @Transactional
-    public Optional<Relations> confirmFriendship(UUID interestUuid, UUID subscriberUuid, boolean isConfirmed) {
-        var optionalRelation = relationsRepo.findBySubscriberAndInterestUuids(interestUuid, subscriberUuid);
-        if(optionalRelation.isPresent()){
-            var relation = optionalRelation.get();
-            if(isConfirmed){
-                relation.setRelationsStatus(RelationsStatus.FRIEND);
-            }else{
-                relation.setRelationsStatus(RelationsStatus.FOLLOWER);
-            }
-            var updatedRelation = relationsRepo.save(relation);
-            log.debug("Friendship between subscriber: '{}' and interest: '{}' with uuid: '{}' was updated successfully.", subscriberUuid,
-                interestUuid, updatedRelation.getUuid());
-            return Optional.of(updatedRelation);
+    public Relations confirmFriendship(UUID interestUuid, UUID subscriberUuid, boolean isConfirmed) {
+        var optionalRelation = relationsRepo.findBySubscriberAndInterestUuids(subscriberUuid, interestUuid);
+        if(optionalRelation.isEmpty()){
+            log.error("Relations for subscriber: '{}' and interest: '{}' doesn't exist.", subscriberUuid, interestUuid);
+            throw new RelationNotFoundException();
         }
-        return optionalRelation;
+        var relation = optionalRelation.get();
+        if(isConfirmed){
+            relation.setRelationsStatus(RelationsStatus.FRIEND);
+        }else{
+            relation.setRelationsStatus(RelationsStatus.FOLLOWER);
+        }
+        var updatedRelation = relationsRepo.save(relation);
+        log.debug("Friendship between subscriber: '{}' and interest: '{}' with uuid: '{}' was updated successfully.", subscriberUuid,
+            interestUuid, updatedRelation.getUuid());
+        return updatedRelation;
     }
 
     @Transactional
-    public Optional<Relations> removeFromFriend(UUID userUuid1, UUID userUuid2) {
+    public Relations removeFromFriend(UUID userUuid1, UUID userUuid2) {
         var optionalRelation = relationsRepo.findBySubscriberAndInterestUuids(userUuid1, userUuid2);
         if (optionalRelation.isEmpty()){
             optionalRelation = relationsRepo.findBySubscriberAndInterestUuids(userUuid2, userUuid1);
         }
-        if (optionalRelation.isPresent()){
-            var relation = optionalRelation.get();
-            relation.setRelationsStatus(RelationsStatus.DECLINED);
-            log.debug("Friendship between '{}' and '{}' with uuid: '{}' was removed.", userUuid1, userUuid2, relation.getUuid());
-            return Optional.of(relation);
+        if (optionalRelation.isEmpty()){
+            log.error("Relations doesn't exist between '{}' and '{}'.", userUuid1, userUuid2);
+            throw new RelationNotFoundException();
         }
-        return optionalRelation;
+        var relation = optionalRelation.get();
+        relation.setRelationsStatus(RelationsStatus.DECLINED);
+        log.debug("Friendship between '{}' and '{}' with uuid: '{}' was removed.", userUuid1, userUuid2, relation.getUuid());
+        return relation;
     }
 
-    public Optional<List<UUID>> getFriends(UUID userUuid) {
-        Optional<List<UUID>> interestUuidsBySubscriberUuid = relationsRepo.findInterestUuidsBySubscriberUuid(userUuid, RelationsStatus.FRIEND);
-        Optional<List<UUID>> subscriberUuidsByInterestUuid = relationsRepo.findSubscriberUuidsByInterestUuid(userUuid, RelationsStatus.FRIEND);
+    public List<UUID> getFriends(UUID userUuid) {
+        var interestUuidsBySubscriberUuid = relationsRepo.findInterestUuidsBySubscriberUuid(userUuid, RelationsStatus.FRIEND);
+        var subscriberUuidsByInterestUuid = relationsRepo.findSubscriberUuidsByInterestUuid(userUuid, RelationsStatus.FRIEND);
         List<UUID> friends = new ArrayList<>();
         interestUuidsBySubscriberUuid.ifPresent(friends::addAll);
         subscriberUuidsByInterestUuid.ifPresent(friends::addAll);
         if (friends.isEmpty()){
             log.debug("No friends for user: '{}'.", userUuid);
-            return interestUuidsBySubscriberUuid;
+            throw new FriendsNotFoundException();
         }
         log.debug("Friends for user: '{}' was got.", userUuid);
-        return Optional.of(friends);
+        return friends;
     }
 
     @Transactional
@@ -123,7 +127,7 @@ public class RelationsService {
             }
             return relation;
         }
-        Relations savedRelation = relationsRepo.save(Relations
+        var savedRelation = relationsRepo.save(Relations
             .builder()
             .subscriberUuid(subscriberUuid)
             .interestUuid(interestUuid)
@@ -132,5 +136,19 @@ public class RelationsService {
         log.debug("Request for follow between subscriber: '{}' and interest: '{}' saved with uuid: '{}'.", subscriberUuid, interestUuid,
             savedRelation.getUuid());
         return savedRelation;
+    }
+
+    public Relations unfollow(UUID subscriberUuid, UUID interestUuid) {
+        var optionalRelation = relationsRepo.findBySubscriberAndInterestUuids(subscriberUuid, interestUuid);
+        if(optionalRelation.isEmpty()){
+            log.error("Relations doesn't exist between '{}' and '{}'.", subscriberUuid, interestUuid);
+            throw new RelationNotFoundException();
+        }
+        var relations = optionalRelation.get();
+        if (relations.getRelationsStatus().equals(RelationsStatus.FOLLOWER)){
+            relations.setRelationsStatus(RelationsStatus.DECLINED);
+            relationsRepo.save(relations);
+        }
+        return relations;
     }
 }
