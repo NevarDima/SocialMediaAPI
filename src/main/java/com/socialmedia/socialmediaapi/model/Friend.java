@@ -12,15 +12,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @Entity
 @Builder
-@Table(name = "relations")
+@Table(name = "friend")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Relations {
+public class Friend {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID uuid;
@@ -28,4 +29,6 @@ public class Relations {
     private UUID interestUuid;
     @Enumerated(EnumType.ORDINAL)
     private RelationsStatus relationsStatus;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

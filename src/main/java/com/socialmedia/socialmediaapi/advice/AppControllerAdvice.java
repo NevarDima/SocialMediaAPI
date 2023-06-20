@@ -1,8 +1,8 @@
 package com.socialmedia.socialmediaapi.advice;
 
+import com.socialmedia.socialmediaapi.exception.FollowersNotFoundException;
 import com.socialmedia.socialmediaapi.exception.FriendsNotFoundException;
 import com.socialmedia.socialmediaapi.exception.PostNotFoundException;
-import com.socialmedia.socialmediaapi.exception.RelationNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class AppControllerAdvice {
 
-    @ExceptionHandler(RelationNotFoundException.class)
-    public ResponseEntity<?> handleRelationNotFoundException(RelationNotFoundException exception){
-        return new ResponseEntity<>("Relation doesn't exist.", HttpStatus.NOT_FOUND);
+    @ExceptionHandler(FollowersNotFoundException.class)
+    public ResponseEntity<?> handleFollowersNotFoundException(FollowersNotFoundException exception){
+        return new ResponseEntity<>("Followers don't exist.", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(FriendsNotFoundException.class)
