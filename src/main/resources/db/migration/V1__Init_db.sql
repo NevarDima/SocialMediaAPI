@@ -5,7 +5,7 @@ create table users
     first_name varchar(256)        not null,
     last_name  varchar(256)        not null,
     password   varchar(256)        not null,
-    role       varchar(256)        not null
+    role       smallint            not null
 );
 
 create table posts
