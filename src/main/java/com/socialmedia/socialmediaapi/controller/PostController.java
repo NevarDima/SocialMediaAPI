@@ -30,62 +30,29 @@ public class PostController {
 
     @PostMapping(value = "/")
     public ResponseEntity<?> createPost(@AuthenticationPrincipal User user, @RequestBody Map<String, Object> postMap){
-        try{
-            var post =  postService.createPost(user, postMap);
-            log.debug("Post with uuid: '{}' successfully saved", post.getUuid());
-            return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
-        }catch (Exception e){
-            log.error("Failed creating post", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
+        var post =  postService.createPost(user, postMap);
+        log.debug("Post with uuid: '{}' successfully saved", post.getUuid());
+        return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{uuid}")
-    public ResponseEntity<?> getPostById(@PathVariable UUID uuid){
-        try{
-            var optionalPost = postService.findPostById(uuid);
-            if(optionalPost.isPresent()) {
-                log.debug("Post with uuid: '{}' successfully found", optionalPost.get().getUuid());
-                return new ResponseEntity<>(postMapper.map(optionalPost.get()), HttpStatus.OK);
-            }
-            log.debug("Post with uuid: '{}' doesn't exist", uuid);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }catch (Exception e){
-            log.error("Failed getting post", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    @GetMapping(value = "/{postUuid}")
+    public ResponseEntity<?> getPostById(@PathVariable UUID postUuid){
+        var post = postService.findPostById(postUuid);
+        log.debug("Post with uuid: '{}' successfully found", post.getUuid());
+        return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/{uuid}")
-    public ResponseEntity<?> updatePostById (@AuthenticationPrincipal User user, @PathVariable UUID uuid, @RequestBody Map<String, Object> postMap){
-        try{
-            var optionalPost =  postService.updatePostById(user.getUuid(), uuid, postMap);
-            if(optionalPost.isPresent()) {
-                log.debug("Post with uuid: '{}' successfully updated", optionalPost.get().getUuid());
-                return new ResponseEntity<>(postMapper.map(optionalPost.get()), HttpStatus.OK);
-            }
-            log.debug("Post with uuid: '{}' doesn't exist", uuid);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }catch (Exception e){
-            log.error("Failed updating post", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    @PostMapping(value = "/{postUuid}")
+    public ResponseEntity<?> updatePostById (@AuthenticationPrincipal User user, @PathVariable UUID postUuid, @RequestBody Map<String, Object> postMap){
+        var post =  postService.updatePostById(user.getUuid(), postUuid, postMap);
+        log.debug("Post with uuid: '{}' successfully updated", post.getUuid());
+        return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/{uuid}")
-    public ResponseEntity<?> deletePostById(@AuthenticationPrincipal User user, @PathVariable UUID uuid){
-        try{
-            var optionalPost = postService.deletePostById(user.getUuid(), uuid);
-            if (optionalPost.isPresent()) {
-                log.debug("Post with uuid: '{}' successfully deleted", uuid);
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-            log.debug("Post with uuid: '{}' doesn't exist", uuid);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }catch (Exception e){
-            log.error("Failed deleting post", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    @DeleteMapping(value = "/{postUuid}")
+    public ResponseEntity<?> deletePostById(@AuthenticationPrincipal User user, @PathVariable UUID postUuid){
+        postService.deletePostById(user.getUuid(), postUuid);
+        log.debug("Post with uuid: '{}' successfully deleted", postUuid);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

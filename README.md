@@ -1,0 +1,1 @@
+Same table fo Friend and Follower was taken from this tutorial https://mysql.tutorials24x7.com/blog/guide-to-design-database-for-social-network-system-in-mysql
