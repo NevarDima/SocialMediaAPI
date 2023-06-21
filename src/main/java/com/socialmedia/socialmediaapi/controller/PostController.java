@@ -35,24 +35,24 @@ public class PostController {
         return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{uuid}")
-    public ResponseEntity<?> getPostById(@PathVariable UUID uuid){
-        var post = postService.findPostById(uuid);
+    @GetMapping(value = "/{postUuid}")
+    public ResponseEntity<?> getPostById(@PathVariable UUID postUuid){
+        var post = postService.findPostById(postUuid);
         log.debug("Post with uuid: '{}' successfully found", post.getUuid());
         return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/{uuid}")
-    public ResponseEntity<?> updatePostById (@AuthenticationPrincipal User user, @PathVariable UUID uuid, @RequestBody Map<String, Object> postMap){
-        var post =  postService.updatePostById(user.getUuid(), uuid, postMap);
+    @PostMapping(value = "/{postUuid}")
+    public ResponseEntity<?> updatePostById (@AuthenticationPrincipal User user, @PathVariable UUID postUuid, @RequestBody Map<String, Object> postMap){
+        var post =  postService.updatePostById(user.getUuid(), postUuid, postMap);
         log.debug("Post with uuid: '{}' successfully updated", post.getUuid());
         return new ResponseEntity<>(postMapper.map(post), HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/{uuid}")
-    public ResponseEntity<?> deletePostById(@AuthenticationPrincipal User user, @PathVariable UUID uuid){
-        postService.deletePostById(user.getUuid(), uuid);
-        log.debug("Post with uuid: '{}' successfully deleted", uuid);
+    @DeleteMapping(value = "/{postUuid}")
+    public ResponseEntity<?> deletePostById(@AuthenticationPrincipal User user, @PathVariable UUID postUuid){
+        postService.deletePostById(user.getUuid(), postUuid);
+        log.debug("Post with uuid: '{}' successfully deleted", postUuid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

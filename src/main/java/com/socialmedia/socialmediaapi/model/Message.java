@@ -19,7 +19,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Message {
+public class Message implements Comparable<Message>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,4 +30,8 @@ public class Message {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Override
+    public int compareTo(Message message) {
+        return getCreatedAt().compareTo(message.getCreatedAt());
+    }
 }

@@ -2,6 +2,7 @@ package com.socialmedia.socialmediaapi.advice;
 
 import com.socialmedia.socialmediaapi.exception.FollowersNotFoundException;
 import com.socialmedia.socialmediaapi.exception.FriendsNotFoundException;
+import com.socialmedia.socialmediaapi.exception.MessageNotFoundException;
 import com.socialmedia.socialmediaapi.exception.PostNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,5 +27,10 @@ public class AppControllerAdvice {
     @ExceptionHandler(PostNotFoundException.class)
     public ResponseEntity<?> handlePostNotFoundException(PostNotFoundException exception){
         return new ResponseEntity<>("Post doesn't exist", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MessageNotFoundException.class)
+    public ResponseEntity<?> handleMessageNotFoundException(MessageNotFoundException exception){
+        return new ResponseEntity<>("Message doesn't exist", HttpStatus.NOT_FOUND);
     }
 }
